@@ -1,18 +1,31 @@
 var app = angular.module("myApp", ['ui.bootstrap']);
 
 app.filter('pagination', function () {
-    return function (array, option) {
+    return function (banks, option) {
         var begin = ((option.currentPage - 1) * option.pageSize);
         var end = begin + option.pageSize;
 
-        return (array || []).slice(begin, end);
+        return (banks || []).slice(begin, end);
+    };
+});
+
+app.filter('favorite', function () {
+    return function (banks, isFavorite, favorites) {
+        if (isFavorite) {
+            return (banks || []).filter(bank => favorites[bank.ifsc]);
+        } else {
+            return banks;
+        }
     };
 });
 
 app.controller("myCtrl", function ($http) {
     var vm = this;
-    vm.banks = [];
     vm.loading = true;
+    vm.isFavorite = false;
+
+    vm.banks = [];
+    vm.favorites = {};
 
     vm.filter = {
         city: 'MUMBAI',
@@ -35,6 +48,7 @@ app.controller("myCtrl", function ($http) {
     ];
 
     vm.getBanks = getBanks;
+    vm.setFavorites = setFavorites;
 
     function getBanks() {
         vm.paginationOption.currentPage = 1;
@@ -48,5 +62,15 @@ app.controller("myCtrl", function ($http) {
             });
     }
 
+    function getFavorites() {
+        vm.favorites = JSON.parse(localStorage.getItem('favorites')) || {};
+    }
+
+    function setFavorites(bank) {
+        vm.favorites[bank.ifsc] = !vm.favorites[bank.ifsc];
+        localStorage.setItem('favorites', JSON.stringify(vm.favorites));
+    }
+
     getBanks();
+    getFavorites();
 });

@@ -25,7 +25,7 @@
         <h2>Banks Search Application</h2>
 
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-2">
                 <div class="form-group">
                     <!-- <label for="city">Select list:</label> -->
                     <select class="form-control" id="city" name="city" ng-model="vm.filter.city"
@@ -34,7 +34,7 @@
                     </select>
                 </div>
             </div>
-            <div class="col-sm-6">
+            <div class="col-sm-8">
                 <div class="input-group">
                     <div class="input-group-btn">
                         <button class="btn btn-default" type="button">
@@ -57,8 +57,12 @@
         </div>
 
         <div ng-if="vm.loading" class="loadersmall"></div>
-
+        <div class="checkbox">
+            <label><input type="checkbox" ng-model="vm.isFavorite" ng-change="vm.paginationOption.currentPage = 1;">View
+                favorites</label>
+        </div>
         <div ng-show="!vm.loading && vm.filteredBanks.length">
+
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -69,17 +73,22 @@
                 </thead>
                 <tbody>
                     <tr
-                        ng-repeat="bank in (vm.filteredBanks = (vm.banks | filter: vm.filter.search)) | pagination: vm.paginationOption">
-                        <td>{{bank.ifsc}}</td>
+                        ng-repeat="bank in (vm.filteredBanks = (vm.banks | favorite: vm.isFavorite:vm.favorites | filter: vm.filter.search)) | pagination: vm.paginationOption">
+                        <td>
+                            {{bank.ifsc}}
+                            <span ng-click="vm.setFavorites(bank)" class="glyphicon"
+                                ng-class="{'glyphicon-heart': vm.favorites[bank.ifsc], 'glyphicon-heart-empty': !vm.favorites[bank.ifsc]}"></span>
+                        </td>
                         <td>{{bank.branch}}</td>
                         <td>{{bank.bank_name}}</td>
                     </tr>
                 </tbody>
             </table>
 
-            <div uib-pagination boundary-links="true" total-items="vm.filteredBanks.length" items-per-page="vm.paginationOption.pageSize"
-                ng-model="vm.paginationOption.currentPage" max-size="vm.paginationOption.maxSize"
-                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></div>
+            <div uib-pagination boundary-links="true" total-items="vm.filteredBanks.length"
+                items-per-page="vm.paginationOption.pageSize" ng-model="vm.paginationOption.currentPage"
+                max-size="vm.paginationOption.maxSize" previous-text="&lsaquo;" next-text="&rsaquo;"
+                first-text="&laquo;" last-text="&raquo;"></div>
         </div>
 
         <div ng-show="!vm.loading && !vm.filteredBanks.length" class="alert alert-warning">
