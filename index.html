@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Bank</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+
+    <!-- CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+    <!-- scripts -->
+    <script src="lib/ui-bootstrap-tpls-2.5.0.js"></script>
+    <script src='main.js'></script>
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl as vm">
+
+    <div class="container">
+        <h2>Banks Search Application</h2>
+
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <!-- <label for="city">Select list:</label> -->
+                    <select class="form-control" id="city" name="city" ng-model="vm.filter.city"
+                        ng-change="vm.getBanks()">
+                        <option ng-repeat="city in vm.cities" ng-value="city">{{city}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <button class="btn btn-default" type="button">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Search" id="search" name="search"
+                        ng-model="vm.filter.search" ng-change="vm.paginationOption.currentPage = 1">
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <select class="form-control" id="city" name="city" ng-model="vm.paginationOption.pageSize"
+                        ng-change="vm.getBanks()">
+                        <option ng-repeat="pageSize in vm.paginationOption.pageSizeOptions" ng-value="pageSize">
+                            {{pageSize}}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="vm.loading" class="loadersmall"></div>
+
+        <div ng-show="!vm.loading && vm.filteredBanks.length">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>IFSC Code</th>
+                        <th>Branch Name</th>
+                        <th>Bank Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        ng-repeat="bank in (vm.filteredBanks = (vm.banks | filter: vm.filter.search)) | pagination: vm.paginationOption">
+                        <td>{{bank.ifsc}}</td>
+                        <td>{{bank.branch}}</td>
+                        <td>{{bank.bank_name}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div uib-pagination boundary-links="true" total-items="vm.filteredBanks.length" items-per-page="vm.paginationOption.pageSize"
+                ng-model="vm.paginationOption.currentPage" max-size="vm.paginationOption.maxSize"
+                previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></div>
+        </div>
+
+        <div ng-show="!vm.loading && !vm.filteredBanks.length" class="alert alert-warning">
+            No records found.
+        </div>
+
+    </div>
+</body>
+
+</html>
