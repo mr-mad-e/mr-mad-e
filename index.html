@@ -1,101 +1,63 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" data-framework="javascript">
 
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Bank</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-
-    <!-- CDN -->
+    <meta charset="utf-8">
+    <title>Calendar App</title>
+    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-
-    <!-- scripts -->
-    <script src="lib/ui-bootstrap-tpls-2.5.0.js"></script>
-    <script src='main.js'></script>
 </head>
 
 <body ng-app="myApp" ng-controller="myCtrl as vm">
-
     <div class="container">
-        <h2>Banks Search Application</h2>
+        <h1>Calendar App</h1>
 
-        <div class="row">
-            <div class="col-sm-2">
-                <div class="form-group">
-                    <!-- <label for="city">Select list:</label> -->
-                    <select class="form-control" id="city" name="city" ng-model="vm.filter.city"
-                        ng-change="vm.getBanks()">
-                        <option ng-repeat="city in vm.cities" ng-value="city">{{city}}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-sm-8">
-                <div class="input-group">
-                    <div class="input-group-btn">
-                        <button class="btn btn-default" type="button">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
-                    </div>
-                    <input type="text" class="form-control" placeholder="Search" id="search" name="search"
-                        ng-model="vm.filter.search" ng-change="vm.paginationOption.currentPage = 1">
-                </div>
-            </div>
-            <div class="col-sm-2">
-                <div class="form-group">
-                    <select class="form-control" id="city" name="city" ng-model="vm.paginationOption.pageSize"
-                        ng-change="vm.getBanks()">
-                        <option ng-repeat="pageSize in vm.paginationOption.pageSizeOptions" ng-value="pageSize">
-                            {{pageSize}}</option>
-                    </select>
-                </div>
-            </div>
+        <div class="month">
+            <ul>
+                <li class="prev" ng-click="vm.setMonth(-1)">&#10094;</li>
+                <li class="next" ng-click="vm.setMonth(1)">&#10095;</li>
+                <li>
+                    {{vm.date.toLocaleString('en-US',{month:'long'})}}
+                    <br>
+                    <span style="font-size:18px">{{vm.date.getFullYear()}}</span>
+                </li>
+            </ul>
         </div>
 
-        <div ng-if="vm.loading" class="loadersmall"></div>
-        <div class="checkbox">
-            <label><input type="checkbox" ng-model="vm.isFavorite" ng-change="vm.paginationOption.currentPage = 1;">View
-                favorites</label>
-        </div>
-        <div ng-show="!vm.loading && vm.filteredBanks.length">
+        <ul class="weekdays">
+            <li>Mo</li>
+            <li>Tu</li>
+            <li>We</li>
+            <li>Th</li>
+            <li>Fr</li>
+            <li>Sa</li>
+            <li>Su</li>
+        </ul>
 
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>IFSC Code</th>
-                        <th>Branch Name</th>
-                        <th>Bank Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr
-                        ng-repeat="bank in (vm.filteredBanks = (vm.banks | favorite: vm.isFavorite:vm.favorites | filter: vm.filter.search)) | pagination: vm.paginationOption">
-                        <td>
-                            {{bank.ifsc}}
-                            <span ng-click="vm.setFavorites(bank)" class="glyphicon"
-                                ng-class="{'glyphicon-heart': vm.favorites[bank.ifsc], 'glyphicon-heart-empty': !vm.favorites[bank.ifsc]}"></span>
-                        </td>
-                        <td>{{bank.branch}}</td>
-                        <td>{{bank.bank_name}}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <ul class="days">
+            <li ng-repeat="day in vm.days track by $index" ng-click="vm.setAppointment($index+1)">
+                <span ng-class="{'active':($index+1 == vm.today)}">{{$index+1}}</span>
+            </li>
+        </ul>
 
-            <div uib-pagination boundary-links="true" total-items="vm.filteredBanks.length"
-                items-per-page="vm.paginationOption.pageSize" ng-model="vm.paginationOption.currentPage"
-                max-size="vm.paginationOption.maxSize" previous-text="&lsaquo;" next-text="&rsaquo;"
-                first-text="&laquo;" last-text="&raquo;"></div>
-        </div>
+        <br>
 
-        <div ng-show="!vm.loading && !vm.filteredBanks.length" class="alert alert-warning">
-            No records found.
+        <div class="alert alert-info alert-dismissible" ng-if="vm.appointments[vm.getDateString(vm.today)]">
+            <a href="#" class="close" ng-click="vm.removeAppointment(vm.today)">
+                <span class="glyphicon glyphicon-remove"></span></p>
+            </a>
+
+            <a href="#" class="close" ng-click="vm.setAppointment(vm.today, true)">
+                <span class="glyphicon glyphicon-edit"></span></p>
+            </a>
+
+            {{vm.appointments[vm.getDateString(vm.today)]}}
         </div>
 
     </div>
+
+    <script src="index.js"></script>
 </body>
 
 </html>
