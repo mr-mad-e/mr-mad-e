@@ -30,6 +30,7 @@ app.controller('myCtrl', function ($scope) {
             var person = prompt(edit ? "Update an appointment" : "Add an appointment", vm.appointments[vm.getDateString(date)]);
             if (person != null) {
                 vm.appointments[vm.getDateString(date)] = person;
+                setAppointments();
             }
 
         }
@@ -37,7 +38,17 @@ app.controller('myCtrl', function ($scope) {
 
     vm.removeAppointment = function (date) {
         delete vm.appointments[vm.getDateString(date)];
+        setAppointments();
+    }
+
+    function getAppointments() {
+        vm.appointments = JSON.parse(localStorage.getItem('appointments')) || {};
+    }
+
+    function setAppointments() {
+        localStorage.setItem('appointments', JSON.stringify(vm.appointments));
     }
 
     vm.setMonth(0);
+    getAppointments();
 });
