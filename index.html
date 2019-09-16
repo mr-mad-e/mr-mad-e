@@ -1,63 +1,102 @@
-<!doctype html>
-<html lang="en" data-framework="javascript">
+<!DOCTYPE html>
+<html>
 
 <head>
-    <meta charset="utf-8">
-    <title>Calendar App</title>
-    <link rel="stylesheet" href="index.css">
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 
-<body ng-app="myApp" ng-controller="myCtrl as vm">
-    <div class="container">
-        <h1>Calendar App</h1>
+<body>
+    <div id="root"></div>
 
-        <div class="month">
-            <ul>
-                <li class="prev" ng-click="vm.setMonth(-1)">&#10094;</li>
-                <li class="next" ng-click="vm.setMonth(1)">&#10095;</li>
-                <li>
-                    {{vm.date.toLocaleString('en-US',{month:'long'})}}
-                    <br>
-                    <span style="font-size:18px">{{vm.date.getFullYear()}}</span>
-                </li>
-            </ul>
-        </div>
+    <script type="text/babel">
 
-        <ul class="weekdays">
-            <li>Mo</li>
-            <li>Tu</li>
-            <li>We</li>
-            <li>Th</li>
-            <li>Fr</li>
-            <li>Sa</li>
-            <li>Su</li>
-        </ul>
+        class App extends React.Component {
 
-        <ul class="days">
-            <li ng-repeat="day in vm.days track by $index" ng-click="vm.setAppointment($index+1)">
-                <span ng-class="{'active':($index+1 == vm.today)}">{{$index+1}}</span>
-            </li>
-        </ul>
+        constructor(props) {
+            super(props);
+            this.state = {
+                value: '',
+                words: []
+            };
+        }
 
-        <br>
+        componentDidMount() {
+            fetch('/words')
+                .then(res => res.json())
+                .then((data) => {
+                    this.setState({ words: data })
+                })
+                .catch(console.error)
+        }
 
-        <div class="alert alert-info alert-dismissible" ng-if="vm.appointments[vm.getDateString(vm.today)]">
-            <a href="#" class="close" ng-click="vm.removeAppointment(vm.today)">
-                <span class="glyphicon glyphicon-remove"></span></p>
-            </a>
+        handleChange = (event) => {
+            this.setState({ value: event.target.value });
+        }
 
-            <a href="#" class="close" ng-click="vm.setAppointment(vm.today, true)">
-                <span class="glyphicon glyphicon-edit"></span></p>
-            </a>
+        handleSubmit = (event) => {
+            event.preventDefault();
 
-            {{vm.appointments[vm.getDateString(vm.today)]}}
-        </div>
+            fetch('/words', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    value: this.state.value,
+                })
+            }).then(() => {
+                this.setState({ value: '' });
+                this.componentDidMount();
+            })
+        }
 
-    </div>
+        render() {
+            return (
+                <div className="container">
+                    <h2>Words count</h2>
 
-    <script src="index.js"></script>
+                    <div className="row">
+                        <div className="col-sm-4" style={{ 'maxHeight': '85vh', 'overflow': 'auto' }}>
+                            <ul className="list-group" >
+                                {
+                                    this.state.words.map(x => {
+                                        return <li key={x._id} className="list-group-item">{x._id} <span className="badge">{x.count}</span></li>
+                                    })
+                                }
+                            </ul>
+                        </div>
+                        <div className="col-sm-8">
+                            <form onSubmit={this.handleSubmit}>
+                                <div className="form-group">
+                                    <label htmlFor="comment">Comment:</label>
+                                    <textarea className="form-control" rows="5" id="comment" value={this.state.value} onChange={this.handleChange}></textarea>
+
+                                </div>
+
+                                <div>
+                                    <button type="submit" className="btn btn-primary">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'))
+    </script>
+
 </body>
 
 </html>

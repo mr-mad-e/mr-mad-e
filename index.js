@@ -1,54 +1,54 @@
-var app = angular.module('myApp', []);
+const express = require('express')
+const app = express()
 
-app.controller('myCtrl', function ($scope) {
-    var vm = this;
-    vm.appointments = {};
+app.use(express.static(__dirname + '/'))
+app.use(express.json())
 
-    vm.today = new Date().getDate();
-    vm.date = new Date();
+let db
 
-    vm.setMonth = function (month) {
-        vm.date.setMonth(vm.date.getMonth() + 1 + month);
-        vm.date.setDate(0);
-        vm.days = new Array(vm.date.getDate());
+const MongoClient = require('mongodb').MongoClient
+
+// Connection URL
+const url = 'mongodb://localhost:27017'
+
+// Database Name
+const dbName = 'myproject'
+
+// Use connect method to connect to the server
+MongoClient.connect(url, function (err, client) {
+    console.log("Connected successfully to server")
+    db = client.db(dbName)
+})
+
+app.get('/', function (req, res) {
+    res.sendFile('index.html')
+})
+
+app.get('/words', function (req, res) {
+    db.collection('words').find().toArray(function (err, docs) {
+        res.json(docs)
+    })
+})
+
+// POST method route
+app.post('/words', function (req, res) {
+    if (req.body.value) {
+        req.body.value.split(' ').forEach(value => {
+            db.collection('words').updateOne({
+                _id: value.toLowerCase().trim()
+            }, {
+                $inc: {
+                    count: 1
+                }
+            }, {
+                upsert: true
+            }, function (err, result) {})
+        })
+        res.json(true)
+    } else {
+        res.json(false)
     }
+})
 
-    vm.getDateString = function (date) {
-        return new Date(new Date(vm.date).setDate(date)).toLocaleDateString();
-    }
-
-    vm.setAppointment = function (date, edit) {
-        vm.today = date;
-
-        if (vm.getDateString(date) < vm.getDateString(new Date().getDate())) {
-            return;
-        }
-
-        if (!edit && vm.appointments[vm.getDateString(date)]) {
-            alert('Appointment already exists');
-        } else {
-            var person = prompt(edit ? "Update an appointment" : "Add an appointment", vm.appointments[vm.getDateString(date)]);
-            if (person != null) {
-                vm.appointments[vm.getDateString(date)] = person;
-                setAppointments();
-            }
-
-        }
-    }
-
-    vm.removeAppointment = function (date) {
-        delete vm.appointments[vm.getDateString(date)];
-        setAppointments();
-    }
-
-    function getAppointments() {
-        vm.appointments = JSON.parse(localStorage.getItem('appointments')) || {};
-    }
-
-    function setAppointments() {
-        localStorage.setItem('appointments', JSON.stringify(vm.appointments));
-    }
-
-    vm.setMonth(0);
-    getAppointments();
-});
+app.listen(3000)
+console.log('http://localhost:3000/')
